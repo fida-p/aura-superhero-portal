@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Environment variables / secrets (real values are NEVER committed)
+.env
+.env.local
+.env.production
+.env.*
+!.env.example
+!.env.*.example
+
+# Redis / data
+*.log
+
+# OS & editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Vite
+frontend/.vite/
+
+# Environment example files are kept, but real env files are ignored above

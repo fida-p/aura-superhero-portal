@@ -1,0 +1,53 @@
+# =====================================================
+# AURA — Guardian of Voices | Render Blueprint
+# Defines the two deployable units of this monorepo.
+#
+# SECURITY: this file contains NO secrets. Keys marked
+# `sync: false` prompt for a private value in the Render
+# Dashboard on creation — enter real SMTP values there,
+# never in git. NEVER commit backend/.env.
+# =====================================================
+
+services:
+  # ---------- Backend: Node.js + Express API ----------
+  - type: web
+    name: aura-backend
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    # Render injects PORT automatically; server.js already honors it.
+    healthCheckPath: /api/health
+    envVars:
+      # Public frontend origin for CORS. Set AFTER the static site
+      # exists, e.g. https://aura-frontend.onrender.com
+      - key: FRONTEND_URL
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        value: "AURA Portal <noreply@example.com>"
+      - key: MAIL_TO
+        sync: false
+
+  # ---------- Frontend: React + Vite static site ----------
+  - type: static
+    name: aura-frontend
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      # Public URL of the deployed backend API. Set AFTER the backend
+      # exists, e.g. https://aura-backend.onrender.com/api, then
+      # manually redeploy/clear-build-cache this site so Vite bakes it in.
+      - key: VITE_API_URL
+        sync: false

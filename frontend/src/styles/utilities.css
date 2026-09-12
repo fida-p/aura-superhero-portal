@@ -1,0 +1,89 @@
+/* =========================================================
+   AURA — Reusable component utilities
+   Small, composable surface/typography helpers built on the
+   design tokens. Only genuinely useful patterns are included.
+   ========================================================= */
+
+/* Frosted glass surface (subtle transparent fill + blur). */
+.aura-glass {
+  background-color: var(--aura-glass);
+  border: 1px solid var(--aura-border);
+  border-radius: var(--aura-radius-md);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Lifted, solid card surface. */
+.aura-card {
+  background-color: color-mix(in srgb, var(--aura-surface) 88%, transparent);
+  border: 1px solid var(--aura-border);
+  border-radius: var(--aura-radius-lg);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 18px 40px -28px rgba(2, 6, 16, 0.9);
+  transition:
+    border-color var(--aura-duration-base) var(--aura-ease-out),
+    transform var(--aura-duration-base) var(--aura-ease-out),
+    box-shadow var(--aura-duration-base) var(--aura-ease-out);
+}
+
+.aura-card:hover {
+  border-color: var(--aura-border-strong);
+  box-shadow: 0 20px 46px -28px rgba(2, 6, 16, 0.95);
+}
+
+/* Brand gradient text (cyan -> violet). */
+.aura-text-gradient {
+  background: var(--aura-gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Thin gradient divider line. */
+.aura-divider {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--aura-border-strong),
+    transparent
+  );
+}
+
+/* Small pill chip. */
+.aura-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--aura-radius-full);
+  border: 1px solid var(--aura-border);
+  background-color: var(--aura-glass);
+  color: var(--aura-text-muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* Ambient brand glows (used sparingly on accents). */
+.aura-glow-primary {
+  box-shadow: 0 0 40px -12px var(--aura-glow-primary);
+}
+.aura-glow-accent {
+  box-shadow: 0 0 40px -12px var(--aura-glow-accent);
+}
+
+/* Center a content column with a consistent max width. */
+.aura-container {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+@media (min-width: 640px) {
+  .aura-container {
+    padding-inline: 2rem;
+  }
+}

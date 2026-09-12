@@ -1,0 +1,85 @@
+/* =========================================================
+   AURA — Guardian of Voices
+   Design Tokens (single source of truth)
+   ---------------------------------------------------------
+   Author CSS custom properties live in :root as `--aura-*`.
+   The `@theme inline` block below maps them into Tailwind
+   CSS v4 utilities (bg-surface, text-ink, border-line, etc.)
+   so the palette is never re-typed per component.
+   ========================================================= */
+
+:root {
+  color-scheme: dark;
+
+  /* --- Palette: background & surfaces ------------------ */
+  --aura-bg: #05070f;              /* deep navy / near-black body bg  */
+  --aura-bg-elevated: #0a0f1c;     /* slightly lighter navy           */
+  --aura-surface: #0d1424;         /* card / secondary surface        */
+  --aura-surface-raised: #141e33;  /* hovered / raised surface        */
+  --aura-glass: rgba(255, 255, 255, 0.04);   /* subtle glass fill  */
+  --aura-glass-strong: rgba(255, 255, 255, 0.07);
+
+  /* --- Palette: accents --------------------------------- */
+  --aura-primary: #22d3ee;            /* electric cyan      */
+  --aura-primary-strong: #67e8f9;     /* brighter cyan      */
+  --aura-accent: #8b5cf6;             /* violet             */
+  --aura-accent-soft: #a78bfa;        /* softer violet      */
+
+  /* --- Palette: text ------------------------------------- */
+  --aura-text: #f4f7fb;         /* cool white for headings   */
+  --aura-text-muted: #a6b4cc;   /* muted blue-gray body text */
+  --aura-text-dim: #64748b;     /* placeholders / disabled   */
+
+  /* --- Borders & glows ----------------------------------- */
+  --aura-border: rgba(148, 163, 184, 0.16);   /* translucent cool border */
+  --aura-border-strong: rgba(148, 163, 184, 0.3);
+  --aura-grid-line: rgba(148, 163, 184, 0.05); /* background grid        */
+  --aura-glow-primary: rgba(34, 211, 238, 0.12);
+  --aura-glow-accent: rgba(139, 92, 246, 0.12);
+
+  /* --- Typography ----------------------------------------- */
+  --aura-font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system,
+    'Helvetica Neue', Arial, sans-serif;
+
+  /* --- Radii ---------------------------------------------- */
+  --aura-radius-sm: 8px;
+  --aura-radius-md: 14px;
+  --aura-radius-lg: 22px;
+  --aura-radius-full: 9999px;
+
+  /* --- Motion ---------------------------------------------- */
+  --aura-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --aura-duration-fast: 160ms;
+  --aura-duration-base: 320ms;
+  --aura-duration-slow: 650ms;
+
+  /* --- Reusable finished gradients / images ----------------- */
+  --aura-gradient-brand: linear-gradient(120deg, var(--aura-primary), var(--aura-accent));
+}
+
+/* Map AURA tokens into Tailwind CSS v4 theme utilities.
+   `inline` makes values resolve to the :root variables above. */
+@theme inline {
+  --font-sans: var(--aura-font-sans);
+
+  --color-bg: var(--aura-bg);
+  --color-bg-elevated: var(--aura-bg-elevated);
+  --color-surface: var(--aura-surface);
+  --color-surface-raised: var(--aura-surface-raised);
+
+  --color-primary: var(--aura-primary);
+  --color-primary-strong: var(--aura-primary-strong);
+  --color-accent: var(--aura-accent);
+  --color-accent-soft: var(--aura-accent-soft);
+
+  --color-ink: var(--aura-text);
+  --color-muted: var(--aura-text-muted);
+  --color-dim: var(--aura-text-dim);
+
+  --color-line: var(--aura-border);
+  --color-line-strong: var(--aura-border-strong);
+
+  --radius-sm: var(--aura-radius-sm);
+  --radius-md: var(--aura-radius-md);
+  --radius-lg: var(--aura-radius-lg);
+}
