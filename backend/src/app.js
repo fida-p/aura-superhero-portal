@@ -7,11 +7,27 @@ import requestRoutes from './routes/request.routes.js';
  * Resolve allowed CORS origins from FRONTEND_URL (comma-separated list),
  * falling back to the local Vite dev origin. Keeps local development
  * working through the proxy while avoiding a permissive "*" in production.
+ *
+ * Browsers send `Origin` as scheme + host + port ONLY (no path), e.g.
+ * "https://fida-p.github.io". A FRONTEND_URL that includes a sub-path
+ * (e.g. ".../aura-superhero-portal/") would therefore never match, and the
+ * browser would block the response while the server logs stay silent.
+ * To tolerate both forms, every entry is normalized to its origin.
  */
+function normalizeOrigin(value) {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) return '';
+  try {
+    return new URL(trimmed).origin;
+  } catch {
+    return trimmed.replace(/\/+$/, '');
+  }
+}
+
 function resolveAllowedOrigins() {
   return (process.env.FRONTEND_URL || 'http://localhost:5173')
     .split(',')
-    .map((origin) => origin.trim())
+    .map(normalizeOrigin)
     .filter(Boolean);
 }
 

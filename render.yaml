@@ -20,8 +20,11 @@ services:
     # Render injects PORT automatically; server.js already honors it.
     healthCheckPath: /api/health
     envVars:
-      # Public frontend origin for CORS. Set AFTER the static site
-      # exists, e.g. https://aura-frontend.onrender.com
+      # Public frontend origin(s) for CORS, comma-separated.
+      # For GitHub Pages set: https://fida-p.github.io
+      # (Browsers send Origin WITHOUT any sub-path, so the bare
+      #  origin is what must match. The backend normalizes any
+      #  path/trailing-slash in this value automatically.)
       - key: FRONTEND_URL
         sync: false
       - key: SMTP_HOST
