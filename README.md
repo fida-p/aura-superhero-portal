@@ -17,7 +17,7 @@ trigger an automatic email notification to the configured recipient.
 ## Stack
 
 - **Frontend:** React + Vite, Tailwind CSS v4, Lucide React, Framer Motion
-- **Backend:** Node.js + Express, CORS, dotenv, Nodemailer
+- **Backend:** Node.js + Express, CORS, dotenv, Resend HTTP email API
 
 ## Repository structure
 
@@ -58,7 +58,7 @@ aura-superhero-portal/
 ```bash
 cd backend
 npm install
-cp .env.example .env   # then fill in real values (SMTP + mail recipients)
+cp .env.example .env   # then fill in real values (RESEND_API_KEY + mail addresses)
 npm run dev            # or npm start
 ```
 
@@ -90,11 +90,8 @@ corresponding `.env` files and fill in real values; all `.env*` are git-ignored.
 |----------|---------|---------|
 | `PORT` | Express port | `5000` |
 | `FRONTEND_URL` | Allowed CORS origin(s), comma-separated | `http://localhost:5173` |
-| `SMTP_HOST` | SMTP server host | `smtp.your-provider.com` |
-| `SMTP_PORT` | SMTP port | `587` |
-| `SMTP_SECURE` | `true` for implicit TLS (465) | `false` |
-| `SMTP_USER` | SMTP auth user | `your-app-account` |
-| `SMTP_PASS` | SMTP auth password / app password | *(your secret — not committed)* |
+| `RESEND_API_KEY` | Resend HTTP API key (create free at resend.com/api-keys). Sent only as a server-side `Authorization: Bearer` header; never in frontend code. | *(your secret — not committed)* |
+| `MAIL_FROM` | From address on notifications. Free Resend accounts must use `AURA Portal <onboarding@resend.dev>` until a domain is verified. | `AURA Portal <onboarding@resend.dev>` |
 ## Deployment (Render)
 
 The app is two deployable units, defined in [`render.yaml`](./render.yaml)
@@ -111,7 +108,7 @@ The app is two deployable units, defined in [`render.yaml`](./render.yaml)
 2. In the Render Dashboard: **New → Blueprint**, select the repo/branch,
    and approve the two services from `render.yaml`.
 3. When prompted, enter the private values in the Dashboard only:
-   backend `FRONTEND_URL`, `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, `MAIL_TO`;
+   backend `FRONTEND_URL`, `RESEND_API_KEY`, `MAIL_TO`;
    frontend `VITE_API_URL`.
    - Deploy order matters: create the backend first, copy its public URL
      (e.g. `https://aura-backend.onrender.com`), then set the frontend's
@@ -134,7 +131,7 @@ The app is two deployable units, defined in [`render.yaml`](./render.yaml)
 - [x] Navbar + hero
 - [x] Powers / mission / get-help sections
 - [x] Conversational chatbot + help-request submission
-- [x] Automatic email notification (Nodemailer/SMTP)
+- [x] Automatic email notification (Resend HTTP API)
 - [x] Deployment preparation (env-driven API URL, docs)
 - [ ] Public deployment + live verification
 
@@ -142,7 +139,7 @@ The app is two deployable units, defined in [`render.yaml`](./render.yaml)
 
 This project is for educational purposes. No real secret keys or email
 credentials are stored in this repository.
-| `MAIL_FROM` | From address on notifications | `AURA Portal <noreply@example.com>` |
+| `MAIL_FROM` | From address on notifications. Free Resend accounts must use the test sender until a domain is verified. | `AURA Portal <onboarding@resend.dev>` |
 | `MAIL_TO` | Recipient of help-request notifications | `notifications@example.com` |
 
 ### Frontend (`frontend/.env.local` or at build time)
@@ -154,12 +151,14 @@ credentials are stored in this repository.
 ## Email notification
 
 `POST /api/requests` validates the payload, then `sendHelpRequestEmail` builds a
-sanitized HTML/text email and sends it via Nodemailer. The endpoint returns
-**HTTP 201 only after** delivery is confirmed by the SMTP server; otherwise it
-returns a generic **500** (SMTP/credential details are never sent to the client).
+sanitized HTML/text email and sends it via the Resend HTTP API (outbound HTTPS
+on port 443, which works on Render Free where SMTP ports 25/465/587 are
+blocked). The endpoint returns **HTTP 201 only after** Resend confirms
+acceptance; otherwise it returns a generic **500** (API keys and provider
+details are never sent to the client).
         ├── routes/            # health, request routes
         ├── controllers/       # request.controller.js
-        ├── services/          # email.service.js (Nodemailer)
+        ├── services/          # email.service.js (Resend HTTP API)
         └── validators/        # request.validator.js
 ```
 

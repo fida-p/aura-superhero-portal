@@ -4,7 +4,7 @@
 #
 # SECURITY: this file contains NO secrets. Keys marked
 # `sync: false` prompt for a private value in the Render
-# Dashboard on creation — enter real SMTP values there,
+# Dashboard on creation — enter real values there,
 # never in git. NEVER commit backend/.env.
 # =====================================================
 
@@ -27,18 +27,15 @@ services:
       #  path/trailing-slash in this value automatically.)
       - key: FRONTEND_URL
         sync: false
-      - key: SMTP_HOST
+      # Resend HTTP API key for help-request emails (port 443, works
+      # on Render Free where outbound SMTP ports 25/465/587 are blocked).
+      # Paste the key ONLY in the Dashboard (never in git).
+      - key: RESEND_API_KEY
         sync: false
-      - key: SMTP_PORT
-        value: "587"
-      - key: SMTP_SECURE
-        value: "false"
-      - key: SMTP_USER
-        sync: false
-      - key: SMTP_PASS
-        sync: false
+      # Sender identity. Free Resend accounts must use the test sender
+      # until a domain is verified (MAIL_TO can still be any address).
       - key: MAIL_FROM
-        value: "AURA Portal <noreply@example.com>"
+        value: "AURA Portal <onboarding@resend.dev>"
       - key: MAIL_TO
         sync: false
 

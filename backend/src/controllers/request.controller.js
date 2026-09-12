@@ -4,8 +4,8 @@ import { sendHelpRequestEmail } from '../services/email.service.js';
 /**
  * POST /api/requests
  * Validates the body, then emails the request to the configured recipient.
- * Only reports success after Nodemailer confirms delivery; otherwise it
- * returns a generic 500 so the frontend never shows a fake "sent" state.
+ * Only reports success after the email API confirms acceptance; otherwise
+ * it returns a generic 500 so the frontend never shows a fake "sent" state.
  */
 export async function createRequest(req, res) {
   const errors = validateRequest(req.body);
@@ -22,8 +22,8 @@ export async function createRequest(req, res) {
       submittedAt: result.submittedAt,
     });
   } catch (err) {
-    // Log a concise message server-side only. Never expose SMTP details,
-    // credentials, or stack traces to the client.
+    // Log a concise message server-side only. Never expose API keys,
+    // addresses, or stack traces to the client.
     console.error('Help request email send failed:', err.message);
     return res.status(500).json({
       message: 'We could not submit your request right now. Please try again later.',

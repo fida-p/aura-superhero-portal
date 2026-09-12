@@ -1,5 +1,3 @@
-import nodemailer from 'nodemailer';
-
 /**
  * escapeHtml — safely encode user-provided values before embedding them
  * in the HTML email body to prevent HTML/script injection.
@@ -20,7 +18,7 @@ export function formatSubmittedAt(date = new Date()) {
 
 /**
  * buildMailContent — pure builder for the help-request email.
- * Separated from the transporter so it can be unit-tested without SMTP.
+ * Separated from the sender so it can be unit-tested without network.
  * Returns { subject, text, html }.
  */
 export function buildMailContent({ name, age, location, email, request, submittedAt }) {
@@ -62,40 +60,61 @@ export function buildMailContent({ name, age, location, email, request, submitte
   return { subject, text, html };
 }
 
-let transporter;
-
-/** Lazily build a single shared Nodemailer transport from env vars. */
-function getTransporter() {
-  if (transporter) return transporter;
-
-  transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: process.env.SMTP_USER
-      ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-      : undefined,
-  });
-
-  return transporter;
-}
+const RESEND_API_URL = 'https://api.resend.com/emails';
 
 /**
- * sendHelpRequestEmail — sends the help-request notification to MAIL_TO.
- * Resolves only after Nodemailer confirms successful delivery, so callers
- * never report success without real confirmation.
+ * sendHelpRequestEmail — sends the help-request notification to MAIL_TO
+ * via the Resend HTTP API (port 443, works on hosts that block SMTP).
+ * Resolves only after Resend confirms acceptance, so callers never
+ * report success without real confirmation. Rejects otherwise.
  */
 export async function sendHelpRequestEmail(requestData) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.MAIL_FROM;
+  const to = process.env.MAIL_TO;
+
+  if (!apiKey) {
+    throw new Error('Email service is not configured (missing RESEND_API_KEY).');
+  }
+  if (!from || !to) {
+    throw new Error('Email service is not configured (missing MAIL_FROM or MAIL_TO).');
+  }
+
   const submittedAt = formatSubmittedAt();
   const content = buildMailContent({ ...requestData, submittedAt });
 
-  const info = await getTransporter().sendMail({
-    from: process.env.MAIL_FROM,
-    to: process.env.MAIL_TO,
-    subject: content.subject,
-    text: content.text,
-    html: content.html,
-  });
+  let res;
+  try {
+    res = await fetch(RESEND_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from,
+        to,
+        subject: content.subject,
+        text: content.text,
+        html: content.html,
+        reply_to: requestData.email,
+      }),
+    });
+  } catch (err) {
+    // Network-level failure (DNS, blocked egress, ...). Never include the
+    // key, addresses, or payload in the thrown message.
+    throw new Error(`Email API request failed: ${err.message}`);
+  }
 
-  return { submittedAt, messageId: info.messageId };
+  if (!res.ok) {
+    // Resend returns JSON like { message: "..." } on 4xx. Read it for the
+    // server log, but never forward raw provider details to the client —
+    // the controller maps every failure to a generic 500.
+    const detail = await res.text().catch(() => '');
+    throw new Error(`Email API rejected the request (status ${res.status}): ${detail.slice(0, 300)}`);
+  }
+
+  const data = await res.json().catch(() => ({}));
+
+  return { submittedAt, messageId: data.id };
 }
