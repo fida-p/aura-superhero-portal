@@ -8,6 +8,12 @@
 # injected here is the PUBLIC Render API URL (not a password,
 # key, or credential — it is already visible in client-side JS).
 # SMTP credentials are never referenced here.
+#
+# NOTE: the "deploy" job requires GitHub Pages to be enabled
+# with Source = "GitHub Actions" (Settings → Pages). A run made
+# BEFORE Pages was enabled fails with:
+#   "Failed to create deployment (status: 404)".
+# Re-running after enabling Pages resolves it.
 # =====================================================
 
 name: Deploy frontend to GitHub Pages
@@ -17,13 +23,12 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Required by actions/deploy-pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Avoid overlapping Pages deployments
+# Avoid overlapping Pages deployments (recommended for Pages)
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -31,9 +36,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -46,9 +48,11 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
+        working-directory: frontend
         run: npm ci
 
       - name: Build frontend
+        working-directory: frontend
         run: npm run build
         env:
           VITE_API_URL: https://aura-backend-djnb.onrender.com/api
@@ -56,6 +60,8 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
+          # NOTE: `working-directory` does NOT apply to `uses:` steps,
+          # so this path is relative to the repo root — correct as-is.
           path: frontend/dist
 
   deploy:
