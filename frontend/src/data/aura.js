@@ -49,7 +49,10 @@ export const hero = {
   primaryCta: { label: 'Talk to AURA', href: '#get-help' },
   secondaryCta: { label: 'Explore the Mission', href: '#mission' },
   visual: {
-    ariaLabel: 'Animated AURA guardian core with concentric signal rings',
+    image: {
+      alt: 'AURA, the Guardian of Voices, a futuristic superhero made of light and sound waves.',
+    },
+    ariaLabel: 'Illustration of AURA, the Guardian of Voices',
     chips: [
       { label: 'Protected', icon: 'shield', position: 'right-0 top-8', delay: '0s' },
       { label: 'Heard', icon: 'mic', position: 'bottom-10 left-1', delay: '1.2s' },
